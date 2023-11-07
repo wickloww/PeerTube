@@ -34,7 +34,9 @@ export const UserNotificationType = {
 
   MY_VIDEO_STUDIO_EDITION_FINISHED: 19,
 
-  NEW_USER_REGISTRATION_REQUEST: 20
+  NEW_USER_REGISTRATION_REQUEST: 20,
+
+  NEW_VIDEO_OWNERSHIP_CHANGE: 21
 } as const
 
 export type UserNotificationType_Type = typeof UserNotificationType[keyof typeof UserNotificationType]
@@ -133,6 +135,13 @@ export interface UserNotification {
   registration?: {
     id: number
     username: string
+  }
+
+  ownershipChange?: {
+    id: number
+    currentOwner: ActorInfo
+    nextOwner: ActorInfo
+    video: VideoInfo
   }
 
   createdAt: string

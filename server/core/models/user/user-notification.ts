@@ -21,6 +21,7 @@ import { VideoModel } from '../video/video.js'
 import { UserNotificationListQueryBuilder } from './sql/user-notitication-list-query-builder.js'
 import { UserRegistrationModel } from './user-registration.js'
 import { UserModel } from './user.js'
+import { VideoChangeOwnershipModel } from '../video/video-change-ownership.js'
 
 @Table({
   tableName: 'userNotification',
@@ -104,6 +105,14 @@ import { UserModel } from './user.js'
       fields: [ 'userRegistrationId' ],
       where: {
         userRegistrationId: {
+          [Op.ne]: null
+        }
+      }
+    },
+    {
+      fields: [ 'videoChangeOwnershipId' ],
+      where: {
+        videoChangeOwnershipId: {
           [Op.ne]: null
         }
       }
@@ -261,6 +270,18 @@ export class UserNotificationModel extends Model<Partial<AttributesOnly<UserNoti
     onDelete: 'cascade'
   })
   UserRegistration: Awaited<UserRegistrationModel>
+
+  @ForeignKey(() => VideoChangeOwnershipModel)
+  @Column
+  videoChangeOwnershipId: number
+
+  @BelongsTo(() => UserRegistrationModel, {
+    foreignKey: {
+      allowNull: true
+    },
+    onDelete: 'cascade'
+  })
+  VideoChangeOwnership: Awaited<VideoChangeOwnershipModel>
 
   static listForApi (userId: number, start: number, count: number, sort: string, unread?: boolean) {
     const where = { userId }
@@ -441,6 +462,15 @@ export class UserNotificationModel extends Model<Partial<AttributesOnly<UserNoti
       ? { id: this.UserRegistration.id, username: this.UserRegistration.username }
       : undefined
 
+    const ownershipChange = this.VideoChangeOwnership
+      ? {
+        id: this.VideoChangeOwnership.id,
+        currentOwner: this.formatActor(this.VideoChangeOwnership.Initiator),
+        nextOwner: this.formatActor(this.VideoChangeOwnership.NextOwner),
+        video: this.formatVideo(this.VideoChangeOwnership.Video)
+      }
+      : undefined
+
     return {
       id: this.id,
       type: this.type,
@@ -455,6 +485,7 @@ export class UserNotificationModel extends Model<Partial<AttributesOnly<UserNoti
       plugin,
       peertube,
       registration,
+      ownershipChange,
       createdAt: this.createdAt.toISOString(),
       updatedAt: this.updatedAt.toISOString()
     }

@@ -1,0 +1,9 @@
+extends ../common/greetings
+
+block title
+  | Someone wants to give you ownership of a video
+
+block content
+  p.
+    #[a(href=currentOwnerUrl title=handle) #{currentOwnerName}] wants to give you ownership of the video
+    "#[a(href=video.url) #{video.name}]". You can reply to this change of ownership in #[a(href=videoOwnershipChangeUrl) your library].

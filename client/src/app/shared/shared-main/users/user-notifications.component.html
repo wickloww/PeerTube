@@ -224,6 +224,14 @@
         </div>
       </ng-container>
 
+      <ng-container *ngSwitchCase="21"> <!-- UserNotificationType.NEW_VIDEO_OWNERSHIP_CHANGE -->
+        <my-global-icon iconName="ownership-change" aria-hidden="true"></my-global-icon>
+
+        <div class="message" i18n>
+          User <a (click)="markAsRead(notification)" [routerLink]="notification.">{{ notification.registration.username }}</a> wants to register on your instance
+        </div>
+      </ng-container>
+
       <ng-container *ngSwitchDefault>
         <my-global-icon iconName="alert" aria-hidden="true"></my-global-icon>
 

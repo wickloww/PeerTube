@@ -19,6 +19,7 @@ import {
 import { VideoChangeOwnershipModel } from '../../../models/video/video-change-ownership.js'
 import { VideoChannelModel } from '../../../models/video/video-channel.js'
 import { VideoModel } from '../../../models/video/video.js'
+import { Notifier } from '@server/lib/notifier/notifier.js'
 
 const ownershipVideoRouter = express.Router()
 
@@ -61,7 +62,7 @@ async function giveVideoOwnership (req: express.Request, res: express.Response) 
   const initiatorAccountId = res.locals.oauth.token.User.Account.id
   const nextOwner = res.locals.nextOwner
 
-  await sequelizeTypescript.transaction(t => {
+  const videoOwnershipChangeTransaction = await sequelizeTypescript.transaction(t => {
     return VideoChangeOwnershipModel.findOrCreate({
       where: {
         initiatorAccountId,
@@ -80,6 +81,9 @@ async function giveVideoOwnership (req: express.Request, res: express.Response) 
   })
 
   logger.info('Ownership change for video %s created.', videoInstance.name)
+
+  Notifier.Instance.notifyOfVideoOwnershipChangeRequest(videoOwnershipChangeTransaction[0])
+
   return res.type('json')
             .status(HttpStatusCode.NO_CONTENT_204)
             .end()

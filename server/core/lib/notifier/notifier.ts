@@ -11,6 +11,7 @@ import {
   MCommentOwnerVideo,
   MPlugin,
   MVideoAccountLight,
+  MVideoChangeOwnershipFormattable,
   MVideoFullLight
 } from '../../types/models/index.js'
 import { JobQueue } from '../job-queue/index.js'
@@ -41,7 +42,8 @@ import {
   OwnedPublicationAfterTranscoding,
   RegistrationRequestForModerators,
   StudioEditionFinishedForOwner,
-  UnblacklistForOwner
+  UnblacklistForOwner,
+  NewVideoOwnershipChange
 } from './shared/index.js'
 
 class Notifier {
@@ -66,7 +68,8 @@ class Notifier {
     newAbuseMessage: [ NewAbuseMessageForReporter, NewAbuseMessageForModerators ],
     newPeertubeVersion: [ NewPeerTubeVersionForAdmins ],
     newPluginVersion: [ NewPluginVersionForAdmins ],
-    videoStudioEditionFinished: [ StudioEditionFinishedForOwner ]
+    videoStudioEditionFinished: [ StudioEditionFinishedForOwner ],
+    newVideoOwnershipChange: [ NewVideoOwnershipChange ]
   }
 
   private static instance: Notifier
@@ -223,6 +226,13 @@ class Notifier {
 
     this.sendNotifications(models, video)
       .catch(err => logger.error('Cannot notify on finished studio edition %s.', video.url, { err }))
+  }
+
+  notifyOfVideoOwnershipChangeRequest (videoChangeOwnership: MVideoChangeOwnershipFormattable) {
+    const models = this.notificationModels.newVideoOwnershipChange
+
+    this.sendNotifications(models, videoChangeOwnership)
+      .catch(err => logger.error('Cannot notify of video ownership change request.', err))
   }
 
   private async notify <T> (object: AbstractNotification<T>) {
